@@ -2,7 +2,7 @@
 
 // Interface người dùng
 export interface IUser {
-    id?: string;               // Có nếu là user đăng nhập từ server
+    _id?: string;               // Có nếu là user đăng nhập từ server
     username: string;          // Bắt buộc (dùng cả cho guest và user)
     email?: string;            // Chỉ có đối với người dùng đăng nhập
     googleId?: string;         // Nếu đăng nhập qua Google
@@ -13,7 +13,7 @@ export interface IUser {
   
   // Interface cho câu hỏi
   export interface IQuestion {
-    id?: string;
+    _id?: string;
     questionText?: string;
     type: 'text' | 'image' | 'audio' | 'video';
     mediaUrl?: string;
@@ -26,7 +26,7 @@ export interface IUser {
   
   // Interface cho Quiz
   export interface IQuiz {
-    id?: string;
+    _id?: string;
     host: IUser;
     title: string;
     description?: string;
@@ -41,7 +41,7 @@ export interface IUser {
   
   // Interface cho Room (phòng chơi)
   export interface IRoom {
-    id?: string;
+    _id?: string;
     quiz: IQuiz;
     host: IUser;
     players: Array<{

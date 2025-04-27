@@ -9,3 +9,8 @@ export const fetchQuizzes = async () => {
   const res = await API.get('/quiz');
   return res.data;
 };
+
+export const getQuizById = async (quizId: string) => {
+  const res = await API.get(`/quiz/${quizId}`);
+  return res.data;
+};

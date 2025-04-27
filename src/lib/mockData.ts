@@ -66,3 +66,76 @@ export const quizList: IQuiz[] = [
   sampleQuiz,
   // Có thể thêm các quiz khác nếu cần
 ];
+
+// src/data/mockData.ts
+
+export const TAGS = [
+  { id: 'math', name: 'Math', color: '#F59E0B' },
+  { id: 'science', name: 'Science', color: '#10B981' },
+  { id: 'history', name: 'History', color: '#6366F1' },
+];
+
+export const QUIZZES = [
+  {
+    id: '1',
+    title: 'Algebra Basics',
+    description: 'Test your knowledge of basic algebra.',
+    imageUrl: '',
+    questions: [{ id: 'q1', questionText: 'What is x in 2x=6?' }],
+    tagId: 'math',
+  },
+  {
+    id: '2',
+    title: 'World War II',
+    description: 'A quiz on major events in WWII.',
+    imageUrl: '',
+    questions: [{ id: 'q2', questionText: 'When did WWII end?' }],
+    tagId: 'history',
+  },
+];
+export const avatarColors = [
+  '#FF6B6B', // Red
+  '#4ECDC4', // Teal
+  '#FFD166', // Yellow
+  '#6B5B95', // Purple
+  '#88D8B0', // Green
+  '#FF8C94', // Pink
+  '#FFAAA5', // Salmon
+  '#B5EAD7', // Mint
+  '#C7CEEA', // Light Blue
+  '#F6EAC2', // Cream
+];
+
+export const avatarHats = [
+  'none',
+  'partyHat',
+  'cowboyHat',
+  'propellerHat',
+  'crown',
+  'wizard',
+];
+
+export const avatarEyes = [
+  'normal',
+  'happy',
+  'wink',
+  'surprised',
+  'sleepy',
+  'angry',
+];
+
+export const avatarMouths = [
+  'smile',
+  'grin',
+  'surprised',
+  'neutral',
+  'sad',
+];
+
+export const avatarAccessories = [
+  'none',
+  'glasses',
+  'sunglasses',
+  'mustache',
+  'bow',
+];

@@ -1,21 +1,24 @@
-// Cấu hình kết nối Socket.IO client
-import { io, Socket } from 'socket.io-client';
 
-// Types bạn có thể import từ '../types' như trước
+import { io, Socket } from 'socket.io-client';
 import { Room, Player } from '../types';
 
 let socket: Socket | null = null;
 
-// Kết nối socket thật
+const SOCKET_URL = 'http://localhost:5000';
+
+const createSocketConnection = (): Socket => {
+  return io(SOCKET_URL, {
+    transports: ['websocket'],
+    withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
+};
+
 export const getSocket = (): Socket => {
   if (!socket) {
-    socket = io('http://localhost:5000', {
-      transports: ['websocket'], // Ép dùng websocket
-      withCredentials: true,     // Cho phép gửi cookie nếu cần
-      reconnection: true,        // Tự động reconnect
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    socket = createSocketConnection();
 
     socket.on('connect', () => {
       console.log('[Socket.IO] Connected with ID:', socket.id);
@@ -33,8 +36,6 @@ export const getSocket = (): Socket => {
   return socket;
 };
 
-
-// Ngắt kết nối
 export const disconnectSocket = (): void => {
   if (socket) {
     socket.disconnect();
@@ -42,49 +43,75 @@ export const disconnectSocket = (): void => {
   }
 };
 
-// Các hàm emit tiện lợi (cho dễ dùng ở Frontend)
-
-export const hostCreateRoom = (
-  data: { quizId: number; name: string; avatar: string; asPlayer: boolean },
+export const emitEvent = (
+  event: string,
+  data: any,
   callback?: (response: any) => void
 ) => {
-  getSocket().emit('host-create-room', data, callback);
+  getSocket().emit(event, data, callback);
 };
 
-export const playerJoinRoom = (
+// ========== Emit Actions ==========
+
+export const createRoomAsHost = (
+  data: { quizId: string; asPlayer: boolean },
+  callback?: (response: any) => void
+) => {
+  emitEvent('host-create-room', data, callback);
+};
+
+export const reconnectAsHost = (
+  data: { pin: string; hostId: string; quizId: string },
+  callback?: (response: any) => void
+) => {
+  emitEvent('host-reconnect', data, callback);
+};
+
+export const reconnectAsPlayer = (
+  data: { pin: string; oldSocketId: string; name: string; avatar: string },
+  callback?: (response: any) => void
+) => {
+  emitEvent('player-reconnect', data, callback);
+};
+
+export const joinRoomAsPlayer = (
   data: { pin: string; name: string; avatar: string },
   callback?: (response: any) => void
 ) => {
-  getSocket().emit('player-join-room', data, callback);
+  emitEvent('player-join-room', data, callback);
 };
 
-export const startGame = (
-  data: { pin: string }
-) => {
-  getSocket().emit('start-game', data);
+export const startGameInRoom = (data: { pin: string }) => {
+  emitEvent('start-game', data);
 };
 
-export const submitAnswer = (
-  data: { pin: string; answer: any },
+export const submitAnswerInRoom = (
+  data: { pin: string; correct: boolean },
   callback?: (response: any) => void
 ) => {
-  getSocket().emit('submit-answer', data, callback);
+  emitEvent('submit-answer', data, callback);
 };
 
-export const nextQuestion = (
-  data: { pin: string }
-) => {
-  getSocket().emit('next-question', data);
+export const moveToNextQuestion = (data: { pin: string }) => {
+  emitEvent('next-question', data);
 };
 
-export const kickPlayer = (
+export const kickPlayerFromRoom = (
   data: { pin: string; targetSocketId: string },
   callback?: (response: any) => void
 ) => {
-  getSocket().emit('kick-player', data, callback);
+  emitEvent('kick-player', data, callback);
 };
 
-// Các hàm lắng nghe sự kiện server gửi về
+export const pauseGame = (data: { pin: string; isPaused: boolean }) => {
+  emitEvent('pause-game', data);
+};
+
+export const leaveRoom = (pin: string) => {
+  emitEvent('leave-room', { pin });
+};
+
+// ========== Listen Events ==========
 
 export const onRoomUpdated = (callback: (room: Room) => void) => {
   getSocket().on('room-updated', callback);
@@ -94,10 +121,26 @@ export const onGameStarted = (callback: (room: Room) => void) => {
   getSocket().on('game-started', callback);
 };
 
-export const onAllAnswersSubmitted = (callback: (data: { player: Player, correct: boolean }) => void) => {
+export const onAllAnswersSubmitted = (
+  callback: (data: { player: Player; correct: boolean }) => void
+) => {
   getSocket().on('all-answers-submitted', callback);
 };
 
 export const onNextQuestion = (callback: (currentQuestion: number) => void) => {
   getSocket().on('next-question', callback);
+};
+
+export const onGamePaused = (callback: (isPaused: boolean) => void) => {
+  getSocket().on('game-paused', callback);
+};
+
+export const onKicked = (callback: () => void) => {
+  getSocket().on('kicked', callback);
+};
+
+// Clear all listeners (useful on cleanup)
+export const removeListeners = () => {
+  if (!socket) return;
+  socket.removeAllListeners();
 };

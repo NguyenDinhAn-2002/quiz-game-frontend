@@ -1,13 +1,13 @@
 // USERS
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   password?: string; // Optional for local registration
   avatar?: string;
   provider: 'local' | 'google';
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // QUIZZES
@@ -15,10 +15,10 @@ export interface Quiz {
   _id: string;
   title: string;
   thumbnail?: string;
+  tag: Tag;
+  questions: Question[];
   description?: string;
-  created_by: string;
-  created_at?: string;
-  updated_at?: string;
+  createdBy: string;
 }
 
 // QUESTIONS
@@ -26,8 +26,8 @@ export type MediaType = 'image' | 'audio' | 'video' | 'text';
 export type QuestionType = 'single' | 'multiple' | 'order' | 'input';
 
 export interface Question {
-  id: string;             // Unique identifier for the question
-  quiz_id: string;        // The ID of the quiz to which the question belongs
+  _id: string;             // Unique identifier for the question
+  quizId: string;        // The ID of the quiz to which the question belongs
   questionText: string;   // The question text
   media: {                // The media associated with the question
     type: MediaType;
@@ -40,33 +40,28 @@ export interface Question {
 
 // OPTIONS interface
 export interface Option {
-  id: string;            // Unique identifier for the option
-  question_id: string;   // The ID of the question this option belongs to
+  _id: string;            // Unique identifier for the option
+  questionId: string;   // The ID of the question this option belongs to
   text: string;          // The text of the option
   isCorrect: boolean;    // Whether this option is correct or not
 }
 
 // TAGS
 export interface Tag {
-  id: string;
+  _id: string;
   name: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// QUIZ_TAGS (many-to-many relation)
-export interface QuizTag {
-  quiz_id: string;
-  tag_id: string;
-}
-
-// GAME TYPES
+// GAME RELATED
 export interface Player {
   socketId: string;
   name: string;
   avatar: string;
   score: number;
   isHost: boolean;
+  isConnected: boolean; // Added isConnected status
 }
 
 export interface Room {
@@ -77,11 +72,26 @@ export interface Room {
   players: Player[];
 }
 
-// AVATAR CUSTOMIZATION
+export interface UserProfile {
+  name: string;
+  avatar: string;
+  role: 'host' | 'player';
+  pin?: string;
+  hostId?: string;
+  asPlayer: boolean;
+  quizId?: string;
+  previousSocketId?: string; // Added to track previous socket ID for reconnection
+}
+
+export enum GamePhase {
+  LOBBY = 'lobby',
+  PLAYING = 'playing',
+  RESULTS = 'results'
+}
+
 export interface AvatarParts {
-  baseColor: string;
-  hat?: string;
-  eyes: string;
-  mouth: string;
-  accessory?: string;
+  hat: string;
+  glasses: string;
+  expression: string;
+  background: string;
 }

@@ -52,19 +52,6 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-                // Space theme colors
-                space: {
-                    DEFAULT: '#0F172A', // Deep space blue
-                    darker: '#020617', // Black hole dark
-                    lighter: '#1E293B', // Cosmic navy
-                    accent1: '#8B5CF6', // Purple nebula
-                    accent2: '#EC4899', // Pink star
-                    accent3: '#3B82F6', // Blue star
-                    accent4: '#10B981', // Green alien
-                    accent5: '#F59E0B', // Orange planet
-                    text: '#E2E8F0', // Star light
-                    glow: 'rgba(139, 92, 246, 0.5)', // Purple glow
-                },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

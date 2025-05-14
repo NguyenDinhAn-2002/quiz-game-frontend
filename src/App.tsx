@@ -5,11 +5,9 @@ import { Toaster } from "./components/ui/toaster";
 import { Toaster as Sonner } from "./components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppRoutes from "./routes";
-import { useEffect } from "react";
-import { getSocket } from "@/socket";
-import Game from "./pages/Game";
-import { GameProvider } from "./contexts/GameContext";
-import { SocketInitializer } from "./components/SocketInitializer";
+import { GameProvider } from "./context/GameContext";
+
+
 
 const queryClient = new QueryClient();
 
@@ -20,7 +18,6 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <GameProvider>
-        <SocketInitializer />
         <Toaster />
         <Sonner />
           <AppRoutes />

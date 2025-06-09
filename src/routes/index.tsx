@@ -1,25 +1,28 @@
 
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 
 import NotFound from "../pages/NotFound";
 import Layout from "@/components/layout/Layout";
-import  Home  from "@/pages/Home";
-
-import Game from "@/pages/GamePlay";
+import  {Home}  from "@/pages/Home";
+import {Login} from "@/pages/Login";
+import {Register} from "@/pages/Register";
+import {Profile} from "@/pages/Profile";
+import {GamePlay} from "@/pages/GamePlay";
+import AuthSuccess from "@/pages/AuthSuccess";
 
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      {/* <Route element={<Layout />}> */}
-      <Route path="/" element={<Home />} />
-            <Route path="/play/:pin" element={<Game />} />
-      
-                {/* </Route> */}
-      
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+     <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/game/:quizId" element={<GamePlay />} />
+            <Route path="/play/:pinId" element={<GamePlay />} />
+             <Route path="/auth-success" element={<AuthSuccess />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
   );
 };
 

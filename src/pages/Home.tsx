@@ -1,182 +1,297 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchQuizzes } from '@/services/quiz';
-import { Quiz } from '@/types';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useGameContext } from '@/context/GameContext';
-import { useToast } from '@/hooks/use-toast';
-import { Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Play, Users, Clock, Tag, Plus, Sparkles, User, LogIn, LogOut } from 'lucide-react';
+import { fetchQuizList } from '../services/quiz';
+import { useAuth } from '../contexts/AuthContext';
+import { QuizEditor } from '../components/QuizEditor';
+import { CreateAIQuizModal } from '../components/CreateAIQuizModal';
+import { Button } from '../components/ui/button';
+import { QuizSummary } from '../types';
 
-const Home = () => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [loading, setLoading] = useState(false);
+export const Home: React.FC = () => {
+  const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
+  const [loading, setLoading] = useState(true);
   const [pinInput, setPinInput] = useState('');
-  const { createRoom, joinRoom } = useGameContext();
+  const [error, setError] = useState('');
+  const [showQuizEditor, setShowQuizEditor] = useState(false);
+  const [showCreateAIQuiz, setShowCreateAIQuiz] = useState(false);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
+
   useEffect(() => {
     loadQuizzes();
   }, []);
-  
+
   const loadQuizzes = async () => {
     try {
       setLoading(true);
-      const data = await fetchQuizzes();
+      const data = await fetchQuizList();
       setQuizzes(data);
-    } catch (error) {
-      console.error('Error loading quizzes:', error);
-      toast({
-        title: 'Error loading quizzes',
-        description: 'Could not load quiz data. Please try again later.',
-        variant: 'destructive'
-      });
+    } catch (err) {
+      console.error('Failed to load quizzes:', err);
+      setError('Failed to load quizzes');
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleCreateRoom = async (quizId: string) => {
-    try {
-      const pin = await createRoom(quizId, false);
-      navigate(`/play/${pin}`);
-    } catch (error) {
-      console.error('Error creating room:', error);
-      toast({
-        title: 'Error creating room',
-        description: 'Could not create a room. Please try again.',
-        variant: 'destructive'
-      });
+
+  const handlePlayQuiz = (quizId: string) => {
+    navigate(`/game/${quizId}`);
+  };
+
+  const handleJoinRoom = () => {
+    if (pinInput.length === 6) {
+      navigate(`/play/${pinInput}`);
+    } else {
+      setError('Please enter a valid 6-digit PIN');
     }
   };
-  
- const handleJoinRoom = async () => {
-  if (!pinInput || pinInput.length < 6) {
-    toast({
-      title: 'Invalid PIN',
-      description: 'Please enter a valid PIN to join a room',
-      variant: 'destructive',
-    });
-    return;
+
+  const handlePinInputChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '');
+    if (numericValue.length <= 6) {
+      setPinInput(numericValue);
+      setError('');
+    }
+  };
+
+  const handleQuizCreated = () => {
+    loadQuizzes(); // Refresh quiz list
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center">
+        <div className="text-white text-xl">Loading quizzes...</div>
+      </div>
+    );
   }
 
-
-  const name = prompt("Nhập tên của bạn:");
-  const avatar = "none:none:happy:blue"; 
-
-  if (!name || name.trim() === '') {
-    toast({
-      title: 'Tên không hợp lệ',
-      description: 'Vui lòng nhập tên để tham gia',
-      variant: 'destructive',
-    });
-    return;
-  }
-
-  try {
-    await joinRoom(pinInput, name, avatar); // Gọi hàm bạn đã viết
-    navigate(`/play/${pinInput}`); // Điều hướng sau khi tham gia thành công
-  } catch (error) {
-    console.error('Join room error:', error);
-    // Không điều hướng nếu thất bại
-  }
-};
-
-  
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 animate-fade-in">Quiz Group</h1>
-          <p className="text-xl text-muted-foreground animate-fade-in">Chơi quiz cùng bạn bè của bạn!</p>
-        </header>
-        
-        <div className="bg-card rounded-xl shadow-lg p-6 mb-12 border border-accent/20 animate-fade-in">
-          <h2 className="text-2xl font-bold mb-4 text-center md:text-left">Tham gia phòng</h2>
-          <div className="flex flex-col md:flex-row gap-3">
-            <Input 
-              placeholder="Nhập mã PIN..." 
-              className="text-lg p-6 focus:ring-2 focus:ring-primary/50" 
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleJoinRoom();
-              }}
-            />
-            <Button 
-              size="lg" 
-              className="md:w-auto whitespace-nowrap transition-all duration-300 hover:bg-primary/90 hover:shadow-md hover:scale-105"
-              onClick={handleJoinRoom}
-            >
-              Tham gia
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700">
+      {/* Header with Auth */}
+      <div className="bg-white/10 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">QuizMaster</h1>
+              <p className="text-white/90">Real-time multiplayer quiz platform</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <Link to="/profile">
+                    <Button variant="outline" className="text-white border-white hover:bg-white/10">
+                      <User className="h-4 w-4 mr-2" />
+                      {user.name}
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    onClick={logout}
+                    className="text-white border-white hover:bg-white/10"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Đăng xuất
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <Button variant="outline" className="text-white border-white hover:bg-white/10">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Đăng nhập
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button className="bg-white text-purple-600 hover:bg-white/90">
+                      Đăng ký
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        
-        <h2 className="text-2xl font-bold mb-6 text-center md:text-left animate-fade-in">Chọn quiz để tạo phòng</h2>
-        
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-muted h-64 rounded-lg"></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quizzes.map((quiz) => (
-              <Card 
-                key={quiz._id} 
-                className="overflow-hidden group hover:shadow-lg transition-all duration-300 border border-muted/50 hover:border-primary/30 hover:translate-y-[-4px] animate-fade-in"
-              >
-                <div 
-                  className="h-40 bg-cover bg-center relative group"
-                  style={{
-                    backgroundImage: quiz.thumbnail 
-                      ? `url(${quiz.thumbnail})` 
-                      : 'linear-gradient(to right, #4f46e5, #8b5cf6)'
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button 
-                      onClick={() => handleCreateRoom(quiz._id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity bg-primary/90 hover:bg-primary hover:scale-110 transition-transform"
-                      size="lg"
-                    >
-                      <Play className="mr-2" size={18} />
-                      Play
-                    </Button>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold line-clamp-1 mb-2">{quiz.title}</h3>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        {quiz.questions.length} câu hỏi
-                      </span>
-                      {quiz.tag && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {quiz.tag.name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 pb-12 pt-8">
+        {/* Join Room Section */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 mb-12 max-w-md mx-auto">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">Join a Room</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <input
+                type="text"
+                value={pinInput}
+                onChange={(e) => handlePinInputChange(e.target.value)}
+                placeholder="Enter 6-digit PIN"
+                className="w-full px-4 py-3 text-center text-2xl font-mono border-2 border-white/20 rounded-lg bg-white/10 text-white placeholder-white/60 focus:outline-none focus:border-white/50"
+                maxLength={6}
+              />
+              {error && (
+                <p className="text-red-300 text-sm mt-2 text-center">{error}</p>
+              )}
+            </div>
             
-            {quizzes.length === 0 && !loading && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                <p>Không có quiz nào. Hãy thử lại sau.</p>
-              </div>
-            )}
+            <button
+              onClick={handleJoinRoom}
+              disabled={pinInput.length !== 6}
+              className={`w-full py-3 rounded-lg font-semibold text-lg transition-all duration-200 ${
+                pinInput.length === 6
+                  ? 'bg-green-500 hover:bg-green-600 text-white hover:scale-105'
+                  : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              Join Room
+            </button>
+          </div>
+        </div>
+
+        {/* Create Quiz Section */}
+        {user && (
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 mb-12">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">Tạo Quiz Mới</h2>
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Button
+                onClick={() => setShowQuizEditor(true)}
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white border-white/30"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Tạo thủ công
+              </Button>
+              <Button
+                onClick={() => setShowCreateAIQuiz(true)}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Tạo bằng AI
+              </Button>
+            </div>
           </div>
         )}
+
+        {/* Available Quizzes */}
+        <div>
+          <h2 className="text-3xl font-bold text-white text-center mb-8">
+            {user ? 'Tất cả Quiz' : 'Create a New Game'}
+          </h2>
+          
+          {error && (
+            <div className="bg-red-500/80 text-white p-4 rounded-lg mb-6 max-w-md mx-auto text-center">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {quizzes.map((quiz) => (
+              <div
+                key={quiz._id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-200"
+              >
+                {/* Thumbnail */}
+                <div className="h-48 bg-gradient-to-br from-purple-400 to-blue-500 relative overflow-hidden">
+                  {quiz.thumbnail ? (
+                    <img
+                      src={quiz.thumbnail}
+                      alt={quiz.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-white text-6xl">🧠</div>
+                    </div>
+                  )}
+                  
+                  {/* Question Count Badge */}
+                  <div className="absolute top-3 right-3 bg-black/50 text-white px-2 py-1 rounded-full text-sm flex items-center space-x-1">
+                    <Clock size={14} />
+                    <span>{quiz.questionCount}</span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                    {quiz.title}
+                  </h3>
+                  
+                  {quiz.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {quiz.description}
+                    </p>
+                  )}
+
+                  {/* Tags */}
+                  {quiz.tags && quiz.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {quiz.tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center space-x-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+                        >
+                          <Tag size={10} />
+                          <span>{tag}</span>
+                        </span>
+                      ))}
+                      {quiz.tags.length > 3 && (
+                        <span className="text-xs text-gray-500">+{quiz.tags.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex items-center space-x-1">
+                      <Users size={14} />
+                      <span>Multiplayer</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Clock size={14} />
+                      <span>{quiz.questionCount} questions</span>
+                    </div>
+                  </div>
+
+                  {/* Play Button */}
+                  <button
+                    onClick={() => handlePlayQuiz(quiz._id)}
+                    className="w-full flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
+                  >
+                    <Play size={16} />
+                    <span>Create Room</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {quizzes.length === 0 && !loading && (
+            <div className="text-center text-white/80 py-12">
+              <p className="text-xl">No quizzes available at the moment.</p>
+              <button
+                onClick={loadQuizzes}
+                className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Modals */}
+      <QuizEditor
+        isOpen={showQuizEditor}
+        onClose={() => setShowQuizEditor(false)}
+        onSuccess={handleQuizCreated}
+      />
+      <CreateAIQuizModal
+        isOpen={showCreateAIQuiz}
+        onClose={() => setShowCreateAIQuiz(false)}
+        onSuccess={handleQuizCreated}
+      />
     </div>
   );
 };
-
-export default Home;

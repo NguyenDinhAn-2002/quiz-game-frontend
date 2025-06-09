@@ -54,44 +54,63 @@ export interface Tag {
   updatedAt?: string;
 }
 
-// GAME RELATED
-export interface Player {
-  socketId: string;
+// Một người chơi trong phòng
+export type Player = {
+  id: string; // Socket ID hoặc UUID
   name: string;
   avatar: string;
   score: number;
-  isHost: boolean;
-  isConnected: boolean; // Added isConnected status
-}
+  isHost?: boolean;
+  hasAnswered?: boolean;
+};
 
-export interface Room {
-  quizId: string;
+// Một câu hỏi
+
+
+// Quiz: danh sách câu hỏi
+
+
+// Một phòng chơi
+export type Room = {
+  id: string;
   hostId: string;
-  isStarted: boolean;
-  currentQuestion: number;
   players: Player[];
-}
+  quiz: Quiz;
+  currentQuestionIndex: number;
+  isStarted: boolean;
+};
 
-export interface UserProfile {
+// Trả lời của người chơi
+export type PlayerAnswer = {
+  playerId: string;
+  answerIndex: number;
+  timeTaken: number; // giây
+};
+
+// Dữ liệu leaderboard
+export type LeaderboardEntry = {
   name: string;
   avatar: string;
-  role: 'host' | 'player';
-  pin?: string;
-  hostId?: string;
-  asPlayer: boolean;
-  quizId?: string;
-  previousSocketId?: string; // Added to track previous socket ID for reconnection
-}
+  score: number;
+};
 
-export enum GamePhase {
-  LOBBY = 'lobby',
-  PLAYING = 'playing',
-  RESULTS = 'results'
-}
+// Dữ liệu khởi tạo phòng (chọn quiz + tạo host)
+export type CreateRoomPayload = {
+  hostName: string;
+  avatar: string;
+  quizId: string;
+};
 
-export interface AvatarParts {
-  hat: string;
-  glasses: string;
-  expression: string;
-  background: string;
-}
+// Dữ liệu tham gia phòng
+export type JoinRoomPayload = {
+  playerName: string;
+  avatar: string;
+  roomId: string;
+};
+
+// Gửi kết quả câu trả lời
+export type AnswerSubmission = {
+  playerId: string;
+  answerIndex: number;
+  timeTaken: number;
+};

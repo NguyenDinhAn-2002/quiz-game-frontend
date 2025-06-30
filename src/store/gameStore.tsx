@@ -169,11 +169,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   
   nextQuestion: () => {
-    const { room, currentUser } = get();
-    if (room && currentUser) {
-      socket.emit('next-question', { roomId: room.id, playerId: currentUser.id });
-    }
-  },
+  const { room, currentUser } = get();
+  console.log('Emitting next-question with:', {
+    roomId: room?.id,
+    playerId: currentUser?.id,
+    hostId: room?.hostId
+  });
+  if (room && currentUser) {
+    socket.emit('next-question', { roomId: room.id, playerId: currentUser.id });
+  }
+}
+,
   
   kickPlayer: (playerId) => {
     const { room, currentUser } = get();

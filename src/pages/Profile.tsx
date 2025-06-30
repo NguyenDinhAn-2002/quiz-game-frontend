@@ -107,14 +107,7 @@ export const Profile: React.FC = () => {
                 <label className="text-sm font-medium text-gray-600">Email</label>
                 <p className="text-lg">{user.email}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Loại tài khoản</label>
-                <p className="text-lg capitalize">{user.provider}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Vai trò</label>
-                <p className="text-lg capitalize">{user.role || 'user'}</p>
-              </div>
+            
             </div>
           </CardContent>
         </Card>

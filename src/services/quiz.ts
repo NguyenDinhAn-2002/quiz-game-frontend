@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { QuizSummary, QuizDetail } from '../types';
+import { QuizSummary, QuizDetail } from '../types/quiz';
 
 const API = axios.create({
   baseURL: 'http://localhost:5000/api',
@@ -16,7 +16,8 @@ export const fetchQuizList = async (): Promise<QuizSummary[]> => {
     thumbnail: quiz.thumbnail,
     tags: quiz.tags || [],
     questionCount: quiz.questions?.length || 0,
-    description: quiz.description
+    description: quiz.description,
+    createdBy: quiz.createdBy || '',
   }));
 };
 

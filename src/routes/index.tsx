@@ -2,7 +2,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 
 import NotFound from "../pages/NotFound";
-import Layout from "@/components/layout/Layout";
 import  {Home}  from "@/pages/Home";
 import {Login} from "@/pages/Login";
 import {Register} from "@/pages/Register";

@@ -1,6 +1,6 @@
 
 import { io, Socket } from "socket.io-client";
-import { PlayerInfo, Question, QuestionResult, ScoreboardData, FinalPlayer } from '../types';
+import { PlayerInfo, Question, QuestionResult, ScoreboardData, FinalPlayer } from '../types/quiz';
 
 interface Room {
   id: string;
@@ -16,7 +16,7 @@ interface Room {
   host: PlayerInfo | null;
 }
 
-const socket: Socket = io('http://localhost:5000', {
+const socket: Socket = io('https://quiz-game-backend-production-d9b4.up.railway.app', {
   transports: ['websocket'],
   withCredentials: true,
   autoConnect: false,

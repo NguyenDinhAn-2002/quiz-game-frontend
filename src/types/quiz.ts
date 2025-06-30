@@ -102,3 +102,100 @@ export interface FinalPlayer {
   avatar: string;
   totalScore: number;
 }
+
+
+export interface Question {
+  _id: string;
+  quizId: string;
+  questionText: string;
+  media: {
+    type: MediaType;
+    url?: string;
+  };
+  questionType: QuestionType;
+  options: Option[];
+  timeLimit: number;
+}
+
+// OPTIONS
+export interface Option {
+  _id: string;
+  questionId: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+// TAGS
+export interface Tag {
+  _id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// GAME STATE
+export interface PlayerInfo {
+  id: string;
+  name: string;
+  avatar: string;
+  score: number;
+  answered: boolean;
+  answer: any;
+  isHost: boolean;
+  isConnected: boolean;
+}
+
+export interface RoomState {
+  id: string;
+  hostId: string;
+  isStarted: boolean;
+  paused: boolean;
+  currentQuestionIndex: number;
+  totalQuestions: number;
+  questionTimeLimit: number;
+  questionStartTime: number;
+  players: PlayerInfo[];
+  quizData: QuizDetail | null;
+  host: PlayerInfo | null;
+}
+
+export interface CurrentUser {
+  id: string;
+  name: string;
+  avatar: string;
+  role: "host" | "player";
+  asPlayer: boolean;
+}
+
+export interface FinalPlayer {
+  id: string;
+  name: string;
+  avatar: string;
+  totalScore: number;
+}
+
+export interface AnswerResult {
+  result: "Đúng" | "Sai";
+  score: number;
+  correctAnswer: string[];
+  playerAnswer: any;
+}
+
+export interface QuestionResult {
+  playerId: string;
+  name: string;
+  avatar?: string;
+  answer: any;
+  isCorrect: boolean;
+  score: number;
+  totalScore: number;
+}
+
+export interface ScoreboardData {
+  players: {
+    playerId: string;
+    name: string;
+    avatar?: string;
+    totalScore: number;
+  }[];
+}

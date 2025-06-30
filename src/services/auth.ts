@@ -41,7 +41,7 @@ export const authService = {
   },
 
 googleLogin: () => {
-  const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
-  window.location.href = `${baseURL}/auth/google`;
+  window.location.href = 'http://quiz-game-backend-production-d9b4.up.railway.app/auth/google';
 }
+
 };

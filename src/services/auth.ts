@@ -40,7 +40,8 @@ export const authService = {
     await API.put('/users/change-password', data);
   },
 
-  googleLogin: () => {
-    window.location.href = 'http://localhost:5000/auth/google';
-  }
+googleLogin: () => {
+  const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+  window.location.href = `${baseURL}/auth/google`;
+}
 };

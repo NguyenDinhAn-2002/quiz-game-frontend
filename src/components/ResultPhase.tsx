@@ -76,6 +76,7 @@ export const ResultPhase: React.FC = () => {
             players={finalLeaderboard}
             title="Kết quả cuối cùng"
             showPodium={true}
+            useTotalScore={true} 
           />
         </div>
 

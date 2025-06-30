@@ -2,7 +2,7 @@ import axios from 'axios';
 import { QuizDetail } from '../types/quiz';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true,
 });
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { LoginRequest, RegisterRequest, AuthResponse, User } from '../types/auth';
 
 const API = axios.create({
-  baseURL: 'http://quiz-game-backend-production-d9b4.up.railway.app/api',
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 

@@ -41,7 +41,7 @@ export const authService = {
   },
 
 googleLogin: () => {
-  window.location.href = 'http://quiz-game-backend-production-d9b4.up.railway.app/auth/google';
+  window.location.href = 'https://quiz-game-backend-production-d9b4.up.railway.app/auth/google';
 }
 
 };

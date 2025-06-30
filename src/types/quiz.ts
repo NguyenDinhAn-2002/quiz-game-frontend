@@ -171,6 +171,7 @@ export interface FinalPlayer {
   id: string;
   name: string;
   avatar: string;
+  score: number;
   totalScore: number;
 }
 
@@ -197,5 +198,6 @@ export interface ScoreboardData {
     name: string;
     avatar?: string;
     totalScore: number;
+    score: number;
   }[];
 }

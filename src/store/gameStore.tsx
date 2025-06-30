@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { RoomState, CurrentUser, QuizSummary, Question, AnswerResult, FinalPlayer, ScoreboardData } from '../types';
+import { RoomState, CurrentUser, QuizSummary, Question, AnswerResult, FinalPlayer, ScoreboardData } from '../types/quiz';
 import socket from '../socket';
 
 interface GameState {

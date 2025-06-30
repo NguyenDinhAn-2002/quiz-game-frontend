@@ -16,7 +16,7 @@ interface Room {
   host: PlayerInfo | null;
 }
 
-const socket: Socket = io('https://quiz-game-backend-production-d9b4.up.railway.app', {
+const socket: Socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
   transports: ['websocket'],
   withCredentials: true,
   autoConnect: false,

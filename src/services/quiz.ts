@@ -3,7 +3,7 @@ import axios from 'axios';
 import { QuizSummary, QuizDetail } from '../types/quiz';
 
 const API = axios.create({
-  baseURL: 'http://quiz-game-backend-production-d9b4.up.railway.app/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true,
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Pause, Play, SkipForward } from 'lucide-react';
+import { CheckCircle, XCircle, Pause, Play, SkipForward, Maximize } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 import { CountdownTimer } from './CountdownTimer';
 import { Leaderboard } from './Leaderboard';
@@ -23,8 +23,8 @@ export const PlayingPhase: React.FC = () => {
   const [hasAnswered, setHasAnswered] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [orderedOptions, setOrderedOptions] = useState<string[]>([]);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
-  // Reset state when new question arrives
   useEffect(() => {
     if (currentQuestion) {
       setSelectedAnswer(null);
@@ -34,7 +34,6 @@ export const PlayingPhase: React.FC = () => {
     }
   }, [currentQuestion]);
 
-  // Show results when answer result arrives
   useEffect(() => {
     if (answerResult) {
       setShowResults(true);
@@ -49,16 +48,25 @@ export const PlayingPhase: React.FC = () => {
   }
 
   const isHost = currentUser.role === "host";
-  const canAnswer = currentUser.asPlayer && !hasAnswered;
+  const canAnswer = currentUser.asPlayer && !hasAnswered && !room.paused;
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+    setIsFullscreen(!isFullscreen);
+  };
 
   const handleSubmitAnswer = () => {
     if (canAnswer && selectedAnswer !== null) {
       let answerToSubmit = selectedAnswer;
-      
+
       if (currentQuestion.questionType === 'order') {
         answerToSubmit = orderedOptions;
       }
-      
+
       submitAnswer(answerToSubmit);
       setHasAnswered(true);
     }
@@ -95,7 +103,7 @@ export const PlayingPhase: React.FC = () => {
     e.preventDefault();
     const draggedId = e.dataTransfer.getData('text/plain');
     const draggedIndex = orderedOptions.indexOf(draggedId);
-    
+
     if (draggedIndex !== -1 && canAnswer) {
       const newOrder = [...orderedOptions];
       newOrder.splice(draggedIndex, 1);
@@ -107,34 +115,33 @@ export const PlayingPhase: React.FC = () => {
 
   const getCorrectAnswerText = () => {
     if (!answerResult || !currentQuestion) return '';
-    
+
     switch (currentQuestion.questionType) {
       case 'single': {
         const correctOption = currentQuestion.options.find(opt => opt.isCorrect);
         return correctOption ? correctOption.text : '';
       }
-      
+
       case 'multiple': {
         const correctOptions = currentQuestion.options.filter(opt => opt.isCorrect);
         return correctOptions.map(opt => opt.text).join(', ');
       }
-      
+
       case 'order': {
-        // For order questions, the correct answer should be provided by backend
-        return Array.isArray(answerResult.correctAnswer) 
+        return Array.isArray(answerResult.correctAnswer)
           ? answerResult.correctAnswer.map(id => {
               const option = currentQuestion.options.find(opt => opt._id === id);
               return option ? option.text : '';
             }).join(' → ')
           : '';
       }
-      
+
       case 'input': {
-        return Array.isArray(answerResult.correctAnswer) 
+        return Array.isArray(answerResult.correctAnswer)
           ? answerResult.correctAnswer.join(', ')
           : answerResult.correctAnswer;
       }
-      
+
       default:
         return '';
     }
@@ -227,7 +234,7 @@ export const PlayingPhase: React.FC = () => {
             {orderedOptions.map((optionId, index) => {
               const option = currentQuestion.options.find(opt => opt._id === optionId);
               if (!option) return null;
-              
+
               return (
                 <div
                   key={option._id}
@@ -235,8 +242,8 @@ export const PlayingPhase: React.FC = () => {
                   onDragStart={(e) => handleOrderDragStart(e, option._id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => handleOrderDrop(e, index)}
-                  className={`p-4 bg-white rounded-lg border-2 border-gray-200 cursor-move transition-all duration-200 ${
-                    canAnswer ? 'hover:bg-purple-50 hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                  className={`p-4 bg-white rounded-lg border-2 border-gray-200 transition-all duration-200 ${
+                    canAnswer ? 'cursor-move hover:bg-purple-50 hover:scale-105' : 'opacity-50 cursor-not-allowed'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -272,7 +279,6 @@ export const PlayingPhase: React.FC = () => {
     }
   };
 
-  // Show scoreboard overlay
   if (showScoreboard && scoreboard) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center">
@@ -282,9 +288,10 @@ export const PlayingPhase: React.FC = () => {
               id: p.playerId,
               name: p.name,
               avatar: p.avatar || '👤',
+              score: p.score,
               totalScore: p.totalScore
             }))}
-            title="Current Standings"
+            title="Bảng xếp hạng"
           />
         </div>
       </div>
@@ -294,12 +301,11 @@ export const PlayingPhase: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 p-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="text-white text-lg">
-                Question {room.currentQuestionIndex + 1} of {room.totalQuestions}
+                Câu hỏi {room.currentQuestionIndex + 1} trên {room.totalQuestions}
               </div>
               <CountdownTimer
                 timeLimit={room.questionTimeLimit}
@@ -308,27 +314,32 @@ export const PlayingPhase: React.FC = () => {
                 isPaused={room.paused}
               />
             </div>
-            
+
             {room.paused && (
               <div className="bg-yellow-500/80 text-white px-4 py-2 rounded-lg mb-4">
-                Game is paused
+                Tạm dừng
               </div>
             )}
           </div>
         </div>
 
-        {/* Host Controls */}
         {isHost && (
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6">
             <div className="flex flex-wrap gap-3 justify-center">
-              <AudioManager/>
+              <AudioManager />
+              <button
+                onClick={toggleFullscreen}
+                className="flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
+              >
+                <Maximize size={20} />
+              </button>
               {room.paused ? (
                 <button
                   onClick={resumeGame}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
                 >
                   <Play size={20} />
-                  <span>Resume</span>
+                  <span>Tiếp tục</span>
                 </button>
               ) : (
                 <button
@@ -336,60 +347,53 @@ export const PlayingPhase: React.FC = () => {
                   className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors"
                 >
                   <Pause size={20} />
-                  <span>Pause</span>
+                  <span>Tạm dừng</span>
                 </button>
               )}
-              
               <button
                 onClick={nextQuestion}
                 className="flex items-center space-x-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
               >
                 <SkipForward size={20} />
-                <span>Next Question</span>
+                <span>Câu hỏi kế tiếp</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Question */}
         <div className="bg-white rounded-lg p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
             {currentQuestion.questionText}
           </h2>
-          
-          {/* Media */}
+
           {currentQuestion.media.url && (
             <div className="mb-6 text-center">
               {currentQuestion.media.type === 'image' && (
-                <img 
-                  src={currentQuestion.media.url} 
-                  alt="Question media" 
+                <img
+                  src={currentQuestion.media.url}
+                  alt="Question media"
                   className="max-w-full h-auto mx-auto rounded-lg"
                 />
               )}
               {currentQuestion.media.type === 'video' && (
-                <video 
-                  src={currentQuestion.media.url} 
-                  controls 
+                <video
+                  src={currentQuestion.media.url}
+                  controls
                   className="max-w-full h-auto mx-auto rounded-lg"
                 />
               )}
               {currentQuestion.media.type === 'audio' && (
-                <audio 
-                  src={currentQuestion.media.url} 
-                  controls 
+                <audio
+                  src={currentQuestion.media.url}
+                  controls
                   className="mx-auto"
                 />
               )}
             </div>
           )}
 
-          {/* Answer Options */}
-          <div className="mb-6">
-            {renderAnswerOptions()}
-          </div>
+          <div className="mb-6">{renderAnswerOptions()}</div>
 
-          {/* Submit Button */}
           {currentUser.asPlayer && (
             <div className="text-center">
               {hasAnswered ? (
@@ -400,14 +404,12 @@ export const PlayingPhase: React.FC = () => {
                         <div className={`text-xl font-bold ${
                           answerResult.result === "Đúng" ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {answerResult.result} - You scored {answerResult.score} points!
+                          {answerResult.result} - Bạn nhận được {answerResult.score} điểm!
                         </div>
-                        
-                        {/* Show correct answer if user answered incorrectly */}
                         {answerResult.result === "Sai" && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-3">
                             <div className="text-green-800 font-semibold mb-2">
-                              Correct Answer:
+                              Câu trả lời đúng:
                             </div>
                             <div className="text-green-700 font-medium">
                               {getCorrectAnswerText()}
@@ -417,22 +419,28 @@ export const PlayingPhase: React.FC = () => {
                       </div>
                     )
                   ) : (
-                    "Waiting for results..."
+                    "Chờ đợi kết quả..."
                   )}
                 </div>
               ) : (
                 <button
                   onClick={handleSubmitAnswer}
-                  disabled={selectedAnswer === null || selectedAnswer === '' || 
-                           (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)}
+                  disabled={
+                    !canAnswer ||
+                    selectedAnswer === null ||
+                    selectedAnswer === '' ||
+                    (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)
+                  }
                   className={`px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-200 ${
-                    selectedAnswer !== null && selectedAnswer !== '' && 
+                    canAnswer &&
+                    selectedAnswer !== null &&
+                    selectedAnswer !== '' &&
                     !(Array.isArray(selectedAnswer) && selectedAnswer.length === 0)
                       ? 'bg-purple-600 hover:bg-purple-700 text-white hover:scale-105'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  Submit Answer
+                  Gửi câu trả lời
                 </button>
               )}
             </div>

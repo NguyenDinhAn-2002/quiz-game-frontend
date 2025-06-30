@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { QuizDetail } from '../types';
+import { QuizDetail } from '../types/quiz';
 
 const API = axios.create({
   baseURL: 'http://localhost:5000/api',
@@ -41,7 +41,7 @@ export interface CreateAIQuizRequest {
 }
 
 export const quizManagementService = {
-  // Khi không có media file cho câu hỏi, có thể dùng createQuiz bình thường:
+
   createQuiz: async (data: CreateQuizRequest): Promise<QuizDetail> => {
     const formData = new FormData();
     formData.append('title', data.title);
@@ -56,8 +56,7 @@ export const quizManagementService = {
     return response.data;
   },
 
-  // Khi có media file kèm theo (thumbnail + media per-question),
-  // gọi createQuizWithFormData và truyền vào FormData đã build sẵn.
+
   createQuizWithFormData: async (payload: FormData): Promise<QuizDetail> => {
     const response = await API.post<QuizDetail>('/quiz', payload, {
       headers: { 'Content-Type': 'multipart/form-data' },

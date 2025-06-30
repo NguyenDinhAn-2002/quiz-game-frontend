@@ -36,7 +36,7 @@ export interface CreateQuizRequest {
 
 export interface CreateAIQuizRequest {
   topic: string;
-  numberOfQuestions: number;
+  numQuestions: number;
   tags?: string[];
 }
 

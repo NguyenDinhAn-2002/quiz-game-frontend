@@ -69,7 +69,9 @@ export const CreateAIQuizModal: React.FC<CreateAIQuizModalProps> = ({ isOpen, on
         topic: formData.topic,
         numberOfQuestions: formData.numberOfQuestions,
         tags: formData.tags
+        
       });
+      
 
       toast({
         title: "Thành công",
@@ -90,6 +92,11 @@ export const CreateAIQuizModal: React.FC<CreateAIQuizModalProps> = ({ isOpen, on
     } catch (error: any) {
       console.error('Error creating AI quiz:', error);
       const message = error.response?.data?.message || 'Lỗi tạo quiz bằng AI';
+      console.log({
+  topic: formData.topic,
+  numberOfQuestions: formData.numberOfQuestions,
+  tags: formData.tags
+});
       toast({
         title: "Lỗi",
         description: message,
